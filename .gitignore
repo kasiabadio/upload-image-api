@@ -1,0 +1,7 @@
+env/
+upload_image/u_img_app/__pychache__/
+upload_image/u_img_app/migrations/
+upload_image/u_img_app/__init__.py 
+upload_image/upload_image/__pycache__/
+upload_image/upload_image/__init__.py 
+upload_image/upload_image/db.sqlite3
