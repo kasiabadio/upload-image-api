@@ -9,6 +9,7 @@ class UserSerializer(serializers.Serializer):
     surname = serializers.CharField(required=True, max_length=50)
     account_tiers = serializers.CharField(max_length=2, required=True)
 
+    
     def create(self, validated_data):
         return User.objects.create(**validated_data)
 
@@ -18,6 +19,7 @@ class UserSerializer(serializers.Serializer):
         instance.name = validated_data.get('name', instance.name)
         instance.surname = validated_data.get('surname', instance.surname)
         instance.account_tiers = validated_data.get('account_tiers', instance.account_tiers)
+        instance.images = validated_data.get('images', instance.images)
         instance.save()
         return instance
 
@@ -30,9 +32,6 @@ class ImageSerializer(serializers.Serializer):
     image = serializers.ImageField(required=False)
     format = serializers.CharField(required=True, max_length=1)
     
-    # foreign key
-    user = serializers.IntegerField(source='user.id_user')
-
     def create(self, validated_data):
         return Image.objects.create(**validated_data)
 

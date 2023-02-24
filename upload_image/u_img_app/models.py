@@ -21,12 +21,15 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'username'
 
 
+def name_file(instance, filename):
+    return '/'.join(['images', str(instance.name), filename])
+
 class Image(models.Model):
     id_image = models.AutoField(primary_key=True)
     created = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100, default='')
     url = models.URLField(max_length=200)
-    image = models.ImageField(null=True)
+    image = models.ImageField(upload_to=name_file, null=True)
 
     PNG = 'P'
     JPG = 'J'

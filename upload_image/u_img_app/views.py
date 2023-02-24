@@ -1,19 +1,20 @@
 from rest_framework import status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.http import HttpRequest
+from rest_framework.views import APIView
+from rest_framework import status, generics
+from rest_framework.renderers import TemplateHTMLRenderer
+
 from .models import User, Image
 from .serializers import UserSerializer, ImageSerializer
 
-
-@api_view(['GET', 'POST'])
-def user_list(request, type=HttpRequest):
-    if request.method == 'GET':
-        snippets = User.objects.all()
-        serializer = UserSerializer(snippets, many=True)
+class UserList(generics.ListCreateAPIView):
+    serializer_class = UserSerializer
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -21,41 +22,43 @@ def user_list(request, type=HttpRequest):
         return Response(serializer.errors,  status=status.HTTP_400_BAD_REQUEST)
     
 
-@api_view(['GET', 'POST'])
-def image_list(request, type=HttpRequest):
-    if request.method == 'GET':
-        snippets = Image.objects.all()
-        serializer = ImageSerializer(snippets, many=True)
-        return Response(serializer.data)
+class ImageList(generics.ListCreateAPIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name ='image_list.html'
+    style = {'template_pack': 'rest_framework/vertical/'}
 
-    elif request.method == 'POST':
-        serializer = ImageSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request):
+        images = Image.objects.all()
+        return Response({'images': images})
     
     
-@api_view(['GET', 'PUT', 'DELETE'])
-def image_detail(request, pk, type=HttpRequest):
+class ImageDetail(generics.RetrieveAPIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    serializer_class = ImageSerializer
+    template_name ='image_detail.html'
+    style = {'template_pack': 'rest_framework/vertical/'}
     
-    try:
-        image = Image.objects.get(pk=pk)
-    except Image.DoesNotExist:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    def get_object(self, pk):
+        try:
+            image = Image.objects.get(pk=pk)
+        except Image.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    if request.method == 'GET':
+    def get(self, request, pk):
+        image = self.get_object(pk)
         serializer = ImageSerializer(image)
-        return Response(serializer.data)
+        return Response({'serializer': serializer, 'image': image})
 
-    elif request.method == 'PUT':
+    def put(self, request, pk):
+        image = self.get_object(pk)
         serializer = ImageSerializer(image, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response({'serializer': serializer, 'image': image})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
+    def delete(self, request, pk):
+        image = self.get_object(pk)
         image.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
