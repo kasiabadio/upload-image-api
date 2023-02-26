@@ -22,15 +22,14 @@ class User(AbstractBaseUser):
 
 
 def name_file(instance, filename):
-    return '/'.join(['images', str(instance.name), filename])
+    return '/'.join(['content', instance.user.username, filename])
 
 class Image(models.Model):
     id_image = models.AutoField(primary_key=True)
     created = models.DateTimeField(auto_now_add=True)
-    title = models.CharField(max_length=100, default='')
-    url = models.URLField(max_length=200)
     image = models.ImageField(upload_to=name_file, null=True)
-
+    title = models.CharField(max_length=80, default='')
+   
     PNG = 'P'
     JPG = 'J'
     FORMAT_CHOICES = [
@@ -40,3 +39,9 @@ class Image(models.Model):
     format = models.CharField(max_length=1, choices=FORMAT_CHOICES, default=JPG)
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     
+
+class Tier(models.Model):
+    id_tier = models.AutoField(primary_key=True)
+    height = models.IntegerField(default=200)
+    resized = models.ImageField(null=True)
+    image2 = models.ForeignKey(Image, null=True, on_delete=models.SET_NULL)
